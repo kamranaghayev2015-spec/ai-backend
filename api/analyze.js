@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 4 = aktiv istifadə edir
 
 BÜTÜN alətlər:
-${JSON.stringify(fullAnswers)}
+${JSON.stringify(answers)}
 
 Analiz et:
 
