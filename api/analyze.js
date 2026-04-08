@@ -42,7 +42,7 @@ Heç bir əlavə mətn yazma.
         })
 
     const data = await response.json();
-    const text = data?.output?.[0]?.content?.[0]?.text;
+    const text = data.choices?.[0]?.message?.content;
 
     return res.status(200).json({ result: text });
 
