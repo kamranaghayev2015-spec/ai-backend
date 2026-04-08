@@ -31,11 +31,15 @@ Heç bir əlavə mətn yazma.
         "Content-Type": "application/json",
         "Authorization": "Bearer " + process.env.OPENAI_API_KEY
       },
-      body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        input: prompt
-      })
-    });
+        body: JSON.stringify({
+          model: "gpt-4.1-mini",
+          messages: [
+            {
+              role: "user",
+              content: prompt
+            }
+          ]
+        })
 
     const data = await response.json();
     const text = data?.output?.[0]?.content?.[0]?.text;
