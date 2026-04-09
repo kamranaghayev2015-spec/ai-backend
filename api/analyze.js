@@ -109,14 +109,12 @@ CAVAB FORMATI (yalnız JSON):
         type: type || "",
         group: group || "",
         answers: answers,
-        analysis: {
-          ...parsed,
-          category_scores: JSON.stringify(calculateCategoryScores(answers))
-        },
+        analysis: parsed,
         score: calculateScore(answers),
+        category_scores: JSON.stringify(calculateCategoryScores(answers)), // 🔥 FIX
         timestamp: new Date().toISOString()
       };
-
+      
       await fetch(process.env.SHEETS_WEBHOOK_URL, {
         method: "POST",
         headers: {
