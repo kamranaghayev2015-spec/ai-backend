@@ -1,6 +1,5 @@
 export default async function handler(req, res) {
 
-  // ✅ CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -14,7 +13,6 @@ export default async function handler(req, res) {
   }
 
   try {
-
     const { answers, name, type, group } = req.body;
 
     if (!answers) {
@@ -63,7 +61,6 @@ CAVAB FORMATI (yalnız JSON):
 }
 `;
 
-    // 🔥 OpenAI call
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -82,7 +79,6 @@ CAVAB FORMATI (yalnız JSON):
     const data = await response.json();
     const rawText = data.choices?.[0]?.message?.content;
 
-    // 🔥 JSON CLEANING
     const cleaned = rawText
       ?.replace(/```json/g, "")
       ?.replace(/```/g, "")
@@ -107,18 +103,17 @@ CAVAB FORMATI (yalnız JSON):
       };
     }
 
-    // 🔥 GOOGLE SHEETS SAVE (SERVER SIDE)
-
     try {
-
       const payload = {
         name: name || "",
         type: type || "",
         group: group || "",
         answers: answers,
-        analysis: parsed,
+        analysis: {
+          ...parsed,
+          category_scores: calculateCategoryScores(answers)
+        },
         score: calculateScore(answers),
-        category_scores: calculateCategoryScores(answers), // 🔥 BU
         timestamp: new Date().toISOString()
       };
 
@@ -142,8 +137,6 @@ CAVAB FORMATI (yalnız JSON):
   }
 }
 
-
-// 🔥 SCORE FUNCTION
 function calculateScore(answers){
   const values = Object.values(answers || {});
   if(!values.length) return 0;
@@ -155,7 +148,6 @@ function calculateScore(answers){
 }
 
 function calculateCategoryScores(answers){
-
   const categories = {};
 
   Object.keys(answers).forEach(key => {
@@ -177,7 +169,6 @@ function calculateCategoryScores(answers){
   Object.keys(categories).forEach(cat => {
     const { total, count } = categories[cat];
     const max = count * 4;
-
     result[cat] = Math.round((total / max) * 100);
   });
 
