@@ -111,7 +111,7 @@ CAVAB FORMATI (yalnız JSON):
         answers: answers,
         analysis: parsed,
         score: calculateScore(answers),
-        category_scores: JSON.stringify(calculateCategoryScores(answers)), // 🔥 FIX
+        category_scores: calculateCategoryScores(answers),
         timestamp: new Date().toISOString()
       };
       
