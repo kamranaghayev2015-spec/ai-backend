@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   try {
     const { answers } = req.body;
 
-    const prompt = `
+const prompt = `
 İstifadəçi AI alətlərini qiymətləndirib:
 
 0 = tanımır
@@ -28,36 +28,68 @@ export default async function handler(req, res) {
 BÜTÜN alətlər:
 ${JSON.stringify(answers)}
 
-Analiz et:
+Sənin vəzifən:
+İstifadəçinin AI istifadə davranışını analiz etmək və ona inkişaf üçün praktik istiqamət verməkdir.
 
-- Güclü tərəflər (3-4)
-- Orta (1-2)
-- İnkişaf edə biləcəyin sahələr (0)
+ÜSLUB:
+- istifadəçiyə "sən" deyə müraciət et
+- human və consultant tone istifadə et
+- quru yox, izah edən və istiqamət verən cümlələr qur
+- real davranışı təsvir et
 
-BÜTÜN kateqoriyaları nəzərə al
-Seçilməyənləri zəif kimi qəbul et
+YAZI QAYDALARI:
+- hər bölmə 2-3 cümlə olsun (çox qısa yazma)
+- ümumi sözlərdən qaç, konkret izah ver
+- istifadəçinin nə etdiyini və nə etmədiyini göstər
 
-Azərbaycan dilində yaz
-Qısa, konkret və human consultant üslubunda yaz
+STRUKTUR:
 
-Tool-ları siyahı şəklində vermə — davranışı izah et
+1. Güclü tərəflərin
+→ sənin artıq yaxşı etdiyin sahələri izah et
+→ “sənin bu sahədə artıq təcrübən var” kimi ifadələr istifadə et
 
-Nəticəni yalnız BU JSON formatında qaytar:
+2. Orta səviyyə
+→ istifadə etdiyin amma stabil olmayan sahələri göstər
+→ “bu sahədə müəyyən biliklərin var, amma…” kimi davam et
+
+3. İnkişaf edə biləcəyin sahələr
+→ istifadə etmədiyin və ya zəif olduğun sahələri izah et
+→ konkret kateqoriyaları qeyd et
+
+4. Növbəti addımlar (ƏN VACİB HİSSƏ)
+
+→ mütləq bullet formatında yaz
+→ hər maddə konkret və praktik olsun
+→ hər maddə “sən … etməlisən” formasında olsun
+→ real istifadə nümunəsi əlavə et
+
+Məsələn:
+- sən ChatGPT istifadə edərək gündəlik işlərini avtomatlaşdırmağa başlaya bilərsən
+- sən Zapier ilə 1 sadə workflow quraraq prosesi optimallaşdıra bilərsən
+
+QAYDALAR:
+- minimum 4-6 action maddəsi yaz
+- fərqli kateqoriyaları əhatə et (yalnız bir sahə yox)
+- ümumi yox, konkret alət + istifadə ssenarisi yaz
+
+CAVAB FORMATI (yalnız JSON):
 
 {
-  "strength": "tam cümlə",
-  "mid": "tam cümlə",
-  "improve": "tam cümlə",
+  "strength": "...",
+  "mid": "...",
+  "improve": "...",
   "actions": [
-    "praktik addım 1",
-    "praktik addım 2",
-    "praktik addım 3"
+    "...",
+    "...",
+    "...",
+    "...",
+    "..."
   ]
 }
 
-Qaydalar:
+Qəti qaydalar:
 - bütün sahələri doldur
-- boş field qaytarma
+- boş qaytarma
 - yalnız JSON qaytar
 - əlavə heç bir mətn yazma
 `;
