@@ -109,9 +109,11 @@ CAVAB FORMATI (yalnız JSON):
         type: type || "",
         group: group || "",
         answers: answers,
-        analysis: parsed,
+        analysis: {
+          ...parsed,
+          category_scores: calculateCategoryScores(answers)
+        },
         score: calculateScore(answers),
-        category_scores: calculateCategoryScores(answers),
         timestamp: new Date().toISOString()
       };
       
