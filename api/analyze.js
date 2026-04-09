@@ -118,6 +118,7 @@ CAVAB FORMATI (yalnız JSON):
         answers: answers,
         analysis: parsed,
         score: calculateScore(answers),
+        category_scores: calculateCategoryScores(answers), // 🔥 BU
         timestamp: new Date().toISOString()
       };
 
@@ -151,4 +152,34 @@ function calculateScore(answers){
   const max = values.length * 4;
 
   return Math.round((sum / max) * 100);
+}
+
+function calculateCategoryScores(answers){
+
+  const categories = {};
+
+  Object.keys(answers).forEach(key => {
+    const [category] = key.split("::");
+
+    if (!categories[category]) {
+      categories[category] = {
+        total: 0,
+        count: 0
+      };
+    }
+
+    categories[category].total += Number(answers[key] || 0);
+    categories[category].count += 1;
+  });
+
+  const result = {};
+
+  Object.keys(categories).forEach(cat => {
+    const { total, count } = categories[cat];
+    const max = count * 4;
+
+    result[cat] = Math.round((total / max) * 100);
+  });
+
+  return result;
 }
