@@ -14,9 +14,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { answers } = req.body;
 
-const prompt = `
+    const { answers, name, type, group } = req.body;
+
+    if (!answers) {
+      return res.status(400).json({ error: "answers is required" });
+    }
+
+    const prompt = `
 İstifadəçi AI alətlərini qiymətləndirib:
 
 0 = tanımır
@@ -38,42 +43,15 @@ Sənin vəzifən:
 - real davranışı təsvir et
 
 YAZI QAYDALARI:
-- hər bölmə 2-3 cümlə olsun (çox qısa yazma)
-- ümumi sözlərdən qaç, konkret izah ver
-- istifadəçinin nə etdiyini və nə etmədiyini göstər
+- hər bölmə 2-3 cümlə olsun
+- ümumi sözlərdən qaç
+- konkret izah ver
 
 STRUKTUR:
-
 1. Güclü tərəflərin
-→ sənin artıq yaxşı etdiyin sahələri izah et
-→ “sənin bu sahədə artıq təcrübən var” kimi ifadələr istifadə et
-
 2. Orta səviyyə
-→ istifadə etdiyin amma stabil olmayan sahələri göstər
-→ “bu sahədə müəyyən biliklərin var, amma…” kimi davam et
-
 3. İnkişaf edə biləcəyin sahələr
-→ istifadə etmədiyin və ya zəif olduğun sahələri izah et
-→ konkret kateqoriyaları qeyd et
-
-4. Növbəti addımlar (ƏN VACİB HİSSƏ)
-
-→ mütləq bullet formatında yaz
-→ hər maddə konkret və praktik olsun
-→ ilk cümlədə istifadəçiyə “sən” ilə müraciət et
-→ action maddələrində təkrar “sən” istifadə etmə
-→ maddələri əmrlər və istiqamətlər formasında yaz
-→ real istifadə nümunəsi əlavə et
-→ bullet maddələr “feil ilə başlasın” (istifadə et, qur, tətbiq et, öyrən və s.)
-
-Məsələn:
-- sən ChatGPT istifadə edərək gündəlik işlərini avtomatlaşdırmağa başlaya bilərsən
-- sən Zapier ilə 1 sadə workflow quraraq prosesi optimallaşdıra bilərsən
-
-QAYDALAR:
-- minimum 4-6 action maddəsi yaz
-- fərqli kateqoriyaları əhatə et (yalnız bir sahə yox)
-- ümumi yox, konkret alət + istifadə ssenarisi yaz
+4. Növbəti addımlar
 
 CAVAB FORMATI (yalnız JSON):
 
@@ -81,22 +59,11 @@ CAVAB FORMATI (yalnız JSON):
   "strength": "...",
   "mid": "...",
   "improve": "...",
-  "actions": [
-    "...",
-    "...",
-    "...",
-    "...",
-    "..."
-  ]
+  "actions": ["...", "..."]
 }
-
-Qəti qaydalar:
-- bütün sahələri doldur
-- boş qaytarma
-- yalnız JSON qaytar
-- əlavə heç bir mətn yazma
 `;
 
+    // 🔥 OpenAI call
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -113,10 +80,9 @@ Qəti qaydalar:
     });
 
     const data = await response.json();
-
     const rawText = data.choices?.[0]?.message?.content;
 
-    // 🔥 JSON CLEANING (ən vacib hissə)
+    // 🔥 JSON CLEANING
     const cleaned = rawText
       ?.replace(/```json/g, "")
       ?.replace(/```/g, "")
@@ -129,8 +95,7 @@ Qəti qaydalar:
     } catch (e) {
       console.error("JSON parse error:", cleaned);
 
-      // fallback cavab
-      return res.status(200).json({
+      parsed = {
         strength: "AI istifadən müəyyən səviyyədə formalaşıb, lakin daha sistemli yanaşma mümkündür.",
         mid: "Bəzi alətlərdən istifadə edirsən, amma bu istifadə davamlı və strukturlu deyil.",
         improve: "Xüsusilə bəzi sahələrdə AI-dən istifadə imkanların hələ tam açılmayıb.",
@@ -139,7 +104,33 @@ Qəti qaydalar:
           "Automation alətlərindən kiçik workflow quraraq başla",
           "Data və analiz alətlərini real işində tətbiq etməyə çalış"
         ]
+      };
+    }
+
+    // 🔥 GOOGLE SHEETS SAVE (SERVER SIDE)
+
+    try {
+
+      const payload = {
+        name: name || "",
+        type: type || "",
+        group: group || "",
+        answers: answers,
+        analysis: parsed,
+        score: calculateScore(answers),
+        timestamp: new Date().toISOString()
+      };
+
+      await fetch(process.env.SHEETS_WEBHOOK_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
       });
+
+    } catch (e) {
+      console.error("Sheets save failed:", e);
     }
 
     return res.status(200).json(parsed);
@@ -148,4 +139,16 @@ Qəti qaydalar:
     console.error("Server error:", err);
     return res.status(500).json({ error: err.message });
   }
+}
+
+
+// 🔥 SCORE FUNCTION
+function calculateScore(answers){
+  const values = Object.values(answers || {});
+  if(!values.length) return 0;
+
+  const sum = values.reduce((a,b)=>a + Number(b || 0), 0);
+  const max = values.length * 4;
+
+  return Math.round((sum / max) * 100);
 }
