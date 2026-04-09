@@ -60,8 +60,11 @@ STRUKTUR:
 
 → mütləq bullet formatında yaz
 → hər maddə konkret və praktik olsun
-→ hər maddə “sən … etməlisən” formasında olsun
+→ ilk cümlədə istifadəçiyə “sən” ilə müraciət et
+→ action maddələrində təkrar “sən” istifadə etmə
+→ maddələri əmrlər və istiqamətlər formasında yaz
 → real istifadə nümunəsi əlavə et
+→ bullet maddələr “feil ilə başlasın” (istifadə et, qur, tətbiq et, öyrən və s.)
 
 Məsələn:
 - sən ChatGPT istifadə edərək gündəlik işlərini avtomatlaşdırmağa başlaya bilərsən
