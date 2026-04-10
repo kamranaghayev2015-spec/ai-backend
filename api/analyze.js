@@ -105,18 +105,15 @@ CAVAB FORMATI (yalnız JSON):
     }
 
     try {
-      const payload = {
-        name: name || "",
-        type: type || "",
-        group: group || "",
-        answers: answers,
-        analysis: {
-          ...parsed,
-          category_scores: calculateCategoryScores(answers)
-        },
-        score: calculateScore(answers),
-        timestamp: new Date().toISOString()
-      };
+    const payload = {
+      name: name || "",
+      type: type || "",
+      group: group || "",
+      answers: answers,
+      score: calculateScore(answers),
+      category_scores: calculateCategoryScores(answers),
+      timestamp: new Date().toISOString()
+    };
       
       await fetch(process.env.SHEETS_WEBHOOK_URL, {
         method: "POST",
@@ -137,7 +134,6 @@ CAVAB FORMATI (yalnız JSON):
     return res.status(500).json({ error: err.message });
   }
 }
-console.log("SHEETS URL:", process.env.SHEETS_WEBHOOK_URL);
 
 function calculateScore(answers){
   const values = Object.values(answers || {});
@@ -147,6 +143,43 @@ function calculateScore(answers){
   const max = values.length * 4;
 
   return Math.round((sum / max) * 100);
+}
+
+function doPost(e) {
+  try {
+
+    const data = JSON.parse(e.postData.contents);
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+    const cat = data.category_scores || {};
+
+    sheet.appendRow([
+      new Date(),
+      data.name || "",
+      data.type || "",
+      data.score || "",
+
+      cat["AI Assistants"] || 0,
+      cat["Writing"] || 0,
+      cat["Presentations"] || 0,
+      cat["Image"] || 0,
+      cat["Video"] || 0,
+      cat["Automation"] || 0,
+      cat["Research"] || 0,
+      cat["Productivity"] || 0,
+      cat["Meetings"] || 0,
+      cat["Data"] || 0,
+      cat["Coding"] || 0,
+      cat["Email"] || 0,
+
+      JSON.stringify(data.answers || {})
+    ]);
+
+    return ContentService.createTextOutput("ok");
+
+  } catch (err) {
+    return ContentService.createTextOutput(err.message);
+  }
 }
 
 function calculateCategoryScores(answers){
