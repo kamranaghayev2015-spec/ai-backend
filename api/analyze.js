@@ -136,7 +136,7 @@ CAVAB FORMATI (yalnız JSON):
     return res.status(500).json({ error: err.message });
   }
 }
-
+console.log("SHEETS URL:", process.env.SHEETS_WEBHOOK_URL);
 function calculateScore(answers){
   const values = Object.values(answers || {});
   if(!values.length) return 0;
